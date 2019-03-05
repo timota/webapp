@@ -1,4 +1,7 @@
 webapp_name: webapp
 webapp_user: webapp
 git_repo: 'https://github.com/timota/webapp.git'
+dbserver: 'db'
+dbport: '27017'
+
 

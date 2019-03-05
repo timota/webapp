@@ -31,6 +31,11 @@
     dest: /home/{{ webapp_user }}/{{ webapp_name }}
     update: yes
 
+- name: 'install {{ webapp_name }} configfile'
+  template:
+    src: app.conf
+    dest: /home/{{ webapp_user }}/{{ webapp_name }}/app.conf
+
 - name: 'install virtualenv'
   become: yes
   become_user: '{{ webapp_user }}'

@@ -11,6 +11,7 @@
     git_repo: 'https://github.com/timota/webapp.git'
     webapp_name: flask_app
     webapp_user: webapp
+    dbserver: "{{ groups['mongodb'][0] }}"
   roles:
     - { role: webapp }
 
