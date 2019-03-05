@@ -2,7 +2,7 @@
 ans-db
 
 [webapp]
-ans-app
+ans-app-*
 
 [lb]
 ans-lb

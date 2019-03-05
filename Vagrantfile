@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
   config.ssh.private_key_path = ["~/.ssh/id_rsa", "~/.vagrant.d/insecure_private_key"]
   config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
-  config.vm.provision "shell", inline: <
+  #config.vm.provision "shell", inline: <
 
   # disable sync dir
   config.vm.synced_folder '.', '/vagrant', disabled: true
@@ -53,11 +53,13 @@ Vagrant.configure("2") do |config|
       ansible.playbook = "playbooks/configure.yml"
       ansible.inventory_path = "playbooks/inventory"
       ansible.limit = "all"
+      ansible.host_key_checking = false
       ansible.extra_vars = {
-        ansible_ssh_user: 'root',
+        ansible_ssh_user: 'vagrant',
         ansible_ssh_private_key_file: "~/.vagrant.d/insecure_private_key"
       }
     end
 
   end
+end
     
