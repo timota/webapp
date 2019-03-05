@@ -18,5 +18,6 @@
   name: 'Deploy LB'
   vars: 
     webservers: "{{ groups['webapp'] }}"
+  become: yes
   roles:
     - { role: lb }

@@ -54,6 +54,7 @@ Vagrant.configure("2") do |config|
       ansible.inventory_path = "playbooks/inventory"
       ansible.limit = "all"
       ansible.host_key_checking = false
+      ansible.config_file = "playbooks/ansible.cfg"
       ansible.extra_vars = {
         ansible_ssh_user: 'vagrant',
         ansible_ssh_private_key_file: "~/.vagrant.d/insecure_private_key"
