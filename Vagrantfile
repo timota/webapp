@@ -39,6 +39,16 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  # ans-app-02
+  config.vm.define "app2" do |app2|
+    app2.vm.hostname = "ans-app-02"
+    app2.vm.network :private_network, ip: "192.168.32.5"
+    
+    app2.vm.provider :virtualbox do |generic|
+      generic.customize ["modifyvm", :id, "--memory", 256]
+    end
+  end
+
   # ans-lb
   config.vm.define "lb" do |lb|
     lb.vm.hostname = "ans-lb"
