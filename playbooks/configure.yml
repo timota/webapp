@@ -1,0 +1,22 @@
+---
+- hosts: mongodb
+  name: 'Deploy MongoDB'
+  become: yes
+  roles:
+    - { role: mongodb }
+
+- hosts: webapp
+  name: 'Deploy WebApp'
+  vars: 
+    git_repo: 'https://github.com/timota/webapp.git'
+    webapp_name: flask_app
+    webapp_user: webapp
+  roles:
+    - { role: webapp }
+
+- hosts: lb
+  name: 'Deploy LB'
+  vars: 
+    webservers: "{{ groups['webapp'] }}"
+  roles:
+    - { role: lb }

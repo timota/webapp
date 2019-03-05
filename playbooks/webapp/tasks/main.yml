@@ -1,0 +1,67 @@
+---
+
+- name: 'install deps'
+  become: yes
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - python3-pip
+    - python3-dev
+    - python3-setuptools
+    - python3-virtualenv
+    - python3-venv
+    - git
+    - nginx
+
+- name: 'create webapp user'
+  become: yes
+  user:
+    name: '{{ webapp_user }}'
+    comment: 'webapp user'
+    groups: www-data
+    append: yes
+
+- name: 'deploy webapp from git'
+  become: yes
+  become_user: '{{ webapp_user }}'
+  git:
+    repo: '{{ git_repo }}'
+    dest: /home/{{ webapp_user }}/{{ webapp_name }}
+    update: yes
+
+- name: 'install virtualenv'
+  become: yes
+  become_user: '{{ webapp_user }}'
+  pip:
+    requirements: /home/{{ webapp_user }}/{{ webapp_name }}/requirements.txt
+    virtualenv: /home/{{ webapp_user }}/{{ webapp_name }}/env
+    virtualenv_command: /usr/bin/python3 -m venv 
+
+- name: 'install systemd service for {{ webapp_name }}'
+  become: yes
+  template:
+    src: service
+    dest: /etc/systemd/system/{{ webapp_name }}.service
+
+- name: 'start systemd app service'
+  systemd: name={{ webapp_name }}.service state=restarted enabled=yes
+
+- name: 'configure nginx'
+  template:
+    src: nginx
+    dest: /etc/nginx/sites-available/{{ webapp_name }}
+
+- name: 'remove default nginx site config'
+  file: path=/etc/nginx/sites-enabled/default state=absent
+
+- name: 'enable {{ webapp_name }} site'
+  file: 
+    src: /etc/nginx/sites-available/{{ webapp_name }}
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+    force: yes
+
+- name: 'restart nginx'
+  systemd: name=nginx state=restarted enabled=yes
+

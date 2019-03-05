@@ -1,0 +1,4 @@
+webapp_name: webapp
+webapp_user: webapp
+git_repo: 'https://github.com/timota/webapp.git'
+
