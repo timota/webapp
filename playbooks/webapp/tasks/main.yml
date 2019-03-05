@@ -32,6 +32,8 @@
     update: yes
 
 - name: 'install {{ webapp_name }} configfile'
+  become: yes
+  become_user: '{{ webapp_user }}'
   template:
     src: app.conf
     dest: /home/{{ webapp_user }}/{{ webapp_name }}/app.conf
