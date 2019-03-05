@@ -15,8 +15,15 @@ import json
 # date module
 import datetime
 
+# read config file
+try:
+    with open('app.conf') as json_data_file:
+        data = json.load(json_data_file)
+except:
+    print('Cannot read config file')
+
 # MongoDB connector
-client = MongoClient('ans-db:27017')
+client = MongoClient(data['server'], int(data['port']))
 db = client.ContactDB
 
 # start Flask
