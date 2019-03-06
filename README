@@ -1,4 +1,106 @@
-will be later
 
-curl --header "Content-Type: application/json" --request POST --data '{"event":"third event"}' http://192.168.1.68:5000/add
+This is an example Flask app, ready to be deployed with a Vagrant and Ansible.
+
+## Flask Web App - Simple RESTful API
+simple RESTful API using the Flask web framework (example: app.py)
+
+Supported methods:
+  - POST - Create a new event. Event will be added to DB with timestamp(UTC timezone)
+          curl --header "Content-Type: application/json" --request POST --data '{"event":"some text"}' http://webapp/add
+  - GET - Obtain information about all events stored in DB.
+          curl http://webapp/get_all_events      
+
+## How it works
+
+Vagrant will deploy 4 hosts:
+  - db   - database
+  - app1 - flask application
+  - app2 - flask application
+  - lb   - nginx loadbalancer
+
+after build process Vagrant will run Ansible provisioner once for all VMs at the end, as we have predifined list of machines and their roles. 
+(can be extend to run for each box based on role) or (run based on dynamic inventory)
+
+### Ansible
+basic playbook will utilise 3 roles:
+ - mongodb
+    - add official mongodb repository
+    - install mongodb-org
+    - configure mongod to listen on 0.0.0.0 (all network interfaces)
+ - webapp
+    - install required python packages
+    - create local user to run flask app 
+    - deploy application from git 
+    - create python virtual env and populate it with required modules (Flask, Gunicorn, PyMongo)
+    - install systemd service to run application
+    - install and configure nginx to run as reverse proxy for Gunicorn
+ - lb
+    - Install NGinx
+    - Configure NGinx upstream servers based on Ansible inventory group
+
+### Ansible Roles defaults that can be overwrited in playbook (see configuration.yml)
+  - mongodb role
+    - repo - repository to install MongoDB from
+    - repo_keyserver - repository apt key
+    - repo_id - repository apt key id
+  - webapp role
+    - webapp_name - web application name
+    - webapp_user - user under which appliation will be started
+    - git_repo - git repository from which application can be deployed
+    - dbserver - database server to which application will be connected
+    - dbport - database port to which application will be connected
+  - lb role
+    - app_name - the same as 'webapp_name' for webapp role, base for URL, example http://flask_app
+    - webservers - ansible inventory group from which upstream servers will be populated
+
+## Prerequisites
+  - Vagrant installed
+  - VirtualBox as provider for Vagrant
+  - Ansible
+  How to install them (out of scope this document) - you can find in official documentation.
+
+## Deploying the app
+Be sure that you have your ssh id_rsa key configured and installed in "~/.ssh/id_rsa" as Vagrant will use it to deploy it to a new build machines.
+So you can ssh to machines from anywhere.
+
+Run Vagrant
+```
+vagrant up
+```
+
+## Test
+To test if you can POST data:
+```
+LB call
+curl --header "Content-Type: application/json" --request POST --data '{"event":"some text"}' http://192.168.32.4/add
+
+Directly APP call
+curl --header "Content-Type: application/json" --request POST --data '{"event":"some text"}' http://192.168.32.3/add
+```
+
+To retrieve data from DB
+```
+curl http://192.168.32.4/get_all_events
+
+curl http://192.168.32.3/get_all_events
+```
+Both results should be the same.
+
+## Backup Strategy
+Backup strategy depends from business requirements and DB size. 
+
+Smaller DBs can be backuped by(in our case) by mongodump and restored by mongorestore. Automation - cron. 
+
+for Bigger DBs - it will be good to use host "offload" - where we can "freeze" DB or temporary deny any write operation for time to take 
+FS snapshot. After this snapshot can be presented to "backup" server to backup data files.
+This also can be scheduled by cron, but better option is - to utilise centraly management solution like an example - Jenkins, etc.
+
+
+
+
+
+
+
+
+
 
